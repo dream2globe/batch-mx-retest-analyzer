@@ -1,0 +1,16 @@
+[project]
+name = "batch-mx-retest-analyzer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.40.7",
+    "pandas>=2.3.1",
+    "pyspark==3.5.5",
+]
+
+[dependency-groups]
+dev = [
+    "pyspark==3.5.5",
+]
