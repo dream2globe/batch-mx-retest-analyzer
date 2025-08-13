@@ -1,0 +1,49 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: retest-report
+  namespace: default
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: "your-repo/retest-report:latest" # IMPORTANT: Change this to your image repository
+  imagePullPolicy: Always
+  mainApplicationFile: "local:///app/main.py"
+  sparkVersion: "3.5.1"
+  restartPolicy:
+    type: Never
+  driver:
+    cores: 1
+    memory: "4g"
+    labels:
+      version: 3.5.1
+    serviceAccount: spark
+    envFrom:
+      - secretRef:
+          name: retest-report-secrets
+  executor:
+    cores: 2
+    instances: 3
+    memory: "4g"
+    labels:
+      version: 3.5.1
+    envFrom:
+      - secretRef:
+          name: retest-report-secrets
+  deps:
+    pyFiles:
+      - "local:///app/settings.py"
+      - "local:///app/spark.py"
+      - "local:///app/data_loader.py"
+      - "local:///app/analyzer.py"
+      - "local:///app/writer.py"
+  sparkConf:
+    "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension"
+    "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+    "spark.hadoop.fs.s3a.endpoint": "http://minio.minio.svc:9000"
+    "spark.hadoop.fs.s3a.path.style.access": "true"
+    "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
+  arguments:
+    - "--s3-bucket"
+    - "data"
